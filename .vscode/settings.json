@@ -1,0 +1,23 @@
+{
+    "editor.defaultFormatter": null,
+    "editor.formatOnSave": false,
+    "python.sortImports.args": [
+        "--profile",
+        "black"
+    ],
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "-l 79"
+    ],
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+        }
+    },
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+    "python.formatting.blackPath": "${workspaceFolder}/.venv/bin/black",
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+}
