@@ -1,10 +1,16 @@
+import qwt
 from helpers.sacfilereader import sac_reader
+from PyQt6.QtCore import QSize, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import QFileDialog, QGridLayout, QWidget
 
 from widgets.plotwidget import PlotWidget
 
 
 class CentralWidget(QWidget):
+    # Create signals
+    y_updated = pyqtSignal(int, name="YUpdated")
+    position_change = pyqtSignal(int, name="position_change")
+
     def __init__(self, widget_parent=None):
         # Init the base class
         QWidget.__init__(self, widget_parent)
@@ -59,8 +65,8 @@ class CentralWidget(QWidget):
                     p.set_axes_semi_auto(
                         self.xMin,
                         self.xMax,
-                        Qwt.QwtPlot.xBottom,
-                        Qwt.QwtPlot.yLeft,
+                        qwt.QwtPlot.xBottom,
+                        qwt.QwtPlot.yLeft,
                     )
             else:
                 for p in self.plot:
@@ -77,8 +83,8 @@ class CentralWidget(QWidget):
                     p.set_axes_semi_auto(
                         self.yMin,
                         self.yMax,
-                        Qwt.QwtPlot.yLeft,
-                        Qwt.QwtPlot.xBottom,
+                        qwt.QwtPlot.yLeft,
+                        qwt.QwtPlot.xBottom,
                     )
             p.get_zoomer().setZoomBase()
 
@@ -97,16 +103,17 @@ class CentralWidget(QWidget):
         self.sync_toggled(self.parentWidget().sync_is_checked())
 
     def get_y_limit(self):
-        self.emit(QtCore.SIGNAL("YUpdated"), self.yMax)
+        self.y_updated.emit(self.yMax)
 
     def init_class_variables(self):
         self.plot = []
         self.xMax = 0
         self.xMin = 0
 
+    @pyqtSlot()
     def show_coordinates(self, position):
         # Emit a signal when a point on the plot has been clicked
-        self.emit(QtCore.SIGNAL("PositionChange"), position)
+        self.position_change.emit(position)
 
     def sync_zoom(self, rect):
         # Sync up the zooming of each plot
@@ -133,4 +140,4 @@ class CentralWidget(QWidget):
             return False
 
     def sizeHint(self):
-        return QtCore.QSize(750, 500)
+        return QSize(750, 500)

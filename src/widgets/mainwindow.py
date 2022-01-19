@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from widgets.centralwidget import CentralWidget
 from widgets.seedinfodialog import SeedInfoDialog
 from widgets.ylimwidget import SetYLimWidget
 
@@ -39,8 +40,8 @@ class PlotWindow(QMainWindow):
 
     def create_widgets(self):
         # Set the central widget
-        # self.central_widget = CentralWidget(self)
-        # self.setCentralWidget(self.central_widget)
+        self.central_widget = CentralWidget(self)
+        self.setCentralWidget(self.central_widget)
 
         # Add status bar to window
         statusbar = QStatusBar()
@@ -176,6 +177,7 @@ class PlotWindow(QMainWindow):
         # Return TRUE if removeMeanAction is checked, FALSE otherwise
         return self.removeMeanAction.isChecked()
 
+    @pyqtSlot()
     def show_coordinates(self, position):
         # Display coordinates in the status bar of the position on the plot
         # where the user clicked

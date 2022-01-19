@@ -1,16 +1,19 @@
 import math
 
-from PyQt6.QtCore import Qt
+import qwt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QPolygonF
 
 
-class PlotWidget(Qwt.QwtPlot):
+class PlotWidget(qwt.QwtPlot):
+    get_coordinates = pyqtSignal()
+
     def __init__(self, data, widget_parent=None):
         # Init the base class
-        Qwt.QwtPlot.__init__(self, widget_parent)
+        qwt.QwtPlot.__init__(self, widget_parent)
 
         # Init class variables
-        self.curve = Qwt.QwtPlotCurve()
+        self.curve = qwt.QwtPlotCurve()
         self.curve.attach(self)
         self.x = []
         self.y = []
@@ -25,39 +28,40 @@ class PlotWidget(Qwt.QwtPlot):
 
         # Call initializer methods
         self.init_plot(data)
-        self.init_picking()
+        # self.init_picking()
         self.init_zooming()
 
         # Plot marker
-        self.d_mrk1 = Qwt.QwtPlotMarker()
-        self.d_mrk1.setLineStyle(Qwt.QwtPlotMarker.VLine)
+        self.d_mrk1 = qwt.QwtPlotMarker()
+        self.d_mrk1.setLineStyle(qwt.QwtPlotMarker.VLine)
         self.d_mrk1.setLabelAlignment(
-            QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom
         )
         self.d_mrk1.attach(self)
 
-    def init_picking(self):
-        self.picker = Qwt.QwtPlotPicker(
-            Qwt.QwtPlot.xBottom,
-            Qwt.QwtPlot.yLeft,
-            Qwt.QwtPicker.PointSelection,
-            Qwt.QwtPlotPicker.CrossRubberBand,
-            Qwt.QwtPicker.AlwaysOn,
-            self.canvas(),
-        )
+    # def init_picking(self):
+    #     self.picker = qwt.QwtPlotPicker(
+    #         qwt.QwtPlot.xBottom,
+    #         qwt.QwtPlot.yLeft,
+    #         qwt.QwtPicker.PointSelection,
+    #         qwt.QwtPlotPicker.CrossRubberBand,
+    #         qwt.QwtPicker.AlwaysOn,
+    #         qwt.QwtPlotMarker.
+    #         self.canvas(),
+    #     )
 
-        QtCore.QObject.connect(
-            self.picker,
-            QtCore.SIGNAL("selected(const QwtDoublePoint&)"),
-            self.parent().show_coordinates,
-        )
+    #     QtCore.QObject.connect(
+    #         self.picker,
+    #         QtCore.SIGNAL("selected(const QwtDoublePoint&)"),
+    #         self.parent().show_coordinates,
+    #     )
 
     def init_zooming(self):
-        self.zoomer = Qwt.QwtPlotZoomer(
-            Qwt.QwtPlot.xBottom,
-            Qwt.QwtPlot.yRight,
-            Qwt.QwtPicker.DragSelection,
-            Qwt.QwtPicker.AlwaysOff,
+        self.zoomer = qwt.QwtPlotZoomer(
+            qwt.QwtPlot.xBottom,
+            qwt.QwtPlot.yRight,
+            qwt.QwtPicker.DragSelection,
+            qwt.QwtPicker.AlwaysOff,
             self.canvas(),
         )
         self.zoomer.setZoomBase()
@@ -67,12 +71,6 @@ class PlotWidget(Qwt.QwtPlot):
         return self.zoomer
 
     def init_plot(self, data):
-        from scipy import signal
-
-        # import time
-        # start = time.clock()
-        # Decimate data
-        # data[0][:] = signal.decimate(data[0], 2)
         # Load x and y points from the data
         b = data[1]
         delta = data[2]
@@ -83,9 +81,6 @@ class PlotWidget(Qwt.QwtPlot):
         self.x[:] = [i + b for i in self.x]
         # load y values
         self.y = [i for i in data[0]]
-
-        # elapsed = time.clock() - start
-        # print "MainWindow time: ", elapsed
 
     def get_mean(self, data):
         return math.fsum(data[0]) / len(data[0])
@@ -106,8 +101,8 @@ class PlotWidget(Qwt.QwtPlot):
 
     def set_axes(self, xMax, xMin, yMax, yMin):
         # Set axes to particular numbers
-        self.setAxisScale(Qwt.QwtPlot.xBottom, xMin, xMax)
-        self.setAxisScale(Qwt.QwtPlot.yLeft, yMin, yMax)
+        self.setAxisScale(qwt.QwtPlot.xBottom, xMin, xMax)
+        self.setAxisScale(qwt.QwtPlot.yLeft, yMin, yMax)
         self.replot()
 
     def set_axes_semi_auto(self, minimum, maximum, axisIDman, axisIDauto):
@@ -118,13 +113,13 @@ class PlotWidget(Qwt.QwtPlot):
 
     def set_axes_auto(self):
         # Let QwtPlot automatically create axes
-        self.setAxisAutoScale(Qwt.QwtPlot.xBottom)
-        self.setAxisAutoScale(Qwt.QwtPlot.yLeft)
+        self.setAxisAutoScale(qwt.QwtPlot.xBottom)
+        self.setAxisAutoScale(qwt.QwtPlot.yLeft)
         self.replot()
 
     def bottom_plot(self, bottom=False):
         self.bottomAxisVisible = bottom
-        self.enableAxis(Qwt.QwtPlot.xBottom, bottom)
+        self.enableAxis(qwt.QwtPlot.xBottom, bottom)
         self.replot()
 
     def delete_plot(self):
@@ -134,8 +129,6 @@ class PlotWidget(Qwt.QwtPlot):
         self.detachItems()
 
     def plot_label(self, plotName):
-        label = QtGui.QLabel(plotName)
-
-        text = Qwt.QwtText(plotName)
+        text = qwt.QwtText(plotName)
 
         self.d_mrk1.setLabel(text)
