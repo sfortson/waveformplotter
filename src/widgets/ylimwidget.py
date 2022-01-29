@@ -1,3 +1,5 @@
+"""Widget for setting y limits with a dialog box."""
+
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
