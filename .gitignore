@@ -1,0 +1,6 @@
+src/__pycache__/
+.venv/
+src/*.pyc
+src/helpers/__pycache__/
+src/widgets/__pycache__/
+*.egg-info
