@@ -1,7 +1,7 @@
 """Widget for setting y limits."""
 
 from PyQt6.QtCore import pyqtSignal, pyqtSlot
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeyEvent, QKeySequence
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
 
 
@@ -63,11 +63,11 @@ class SetYLimWidget(QWidget):
         """Set line edit value to yMax."""
         self.line.setText(str(y_max))
 
-    def keyPressEvent(self, event) -> None:  # pylint: disable=invalid-name
+    def keyPressEvent(self, event: QKeyEvent) -> None:  # pylint: disable=invalid-name
         """
         Allow the user to hit enter when setting y-limit.
 
-        :param QEvent event: KeyPressEvent
+        :param QKeyEvent event: KeyPressEvent
         """
         if event.matches(QKeySequence.StandardKey.InsertParagraphSeparator):
             self.set_button_clicked()

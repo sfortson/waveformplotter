@@ -1,92 +1,127 @@
+"""Group box widget for selecting start and end times to be viewed."""
+
 from PyQt6.QtCore import QDate, QDateTime, QTime
-from PyQt6.QtWidgets import QDateTimeEdit, QGridLayout, QGroupBox, QLabel
+from PyQt6.QtWidgets import QDateTimeEdit, QGridLayout, QGroupBox, QLabel, QWidget
 
 from helpers.julday import dayofyear
 
 
 class TimeSelector(QGroupBox):
-    def __init__(self, startTime, endTime, parent):
+    """
+    TimeSelector subclasses QGroupBox to create a widget for selecting start and end times.
+
+    :param float start_time: Start time
+    :param float end_time: End time
+    :param QWidget parent: Parent widget
+    """
+
+    def __init__(self, start_time: float, end_time: float, parent: QWidget):
         # Init the base class
         QGroupBox.__init__(self, "Select Start and End Times", parent)
 
         # Define class variables
-        self.startDateTime = QDateTimeEdit(self)
-        self.endDateTime = QDateTimeEdit(self)
-        self.init_dates_and_times(startTime, endTime)
+        self.start_date_time = QDateTimeEdit(self)
+        self.end_date_time = QDateTimeEdit(self)
+        min_date, max_date = self._init_dates_and_times(start_time, end_time)
 
         # Init the widgets
-        self.init_widgets(startTime, endTime)
+        self._init_widgets(min_date, max_date)
 
-    def init_dates_and_times(self, startTime, endTime):
-        # Get the start time of the seed file
-        stmp = startTime.split(",")
-        syear = str(stmp[0])
-        sjulianDay = str(stmp[1])
-        sfullTime = str(stmp[2])
-        shour = sfullTime.split(":")[0]
-        sminute = sfullTime.split(":")[1]
-        ssecond = float(sfullTime.split(":")[2])
-        scalday = dayofyear(int(syear), int(sjulianDay))
-        smonth = scalday[:2]
-        sday = scalday[2:4]
+    def _init_dates_and_times(self, start_time: float, end_time: float) -> None:
+        """
+        Get the start time of the seed file.
+
+        :param float start_time: Start time
+        :param float end_time: End time
+        """
+        start_tmp = start_time.split(",")
+        start_year = str(start_tmp[0])
+        start_julian_day = str(start_tmp[1])
+        start_full_time = str(start_tmp[2])
+        start_hour = start_full_time.split(":", maxsplit=1)[0]
+        start_minute = start_full_time.split(":")[1]
+        start_second = float(start_full_time.split(":")[2])
+        start_calday = dayofyear(int(start_year), int(start_julian_day))
+        start_month = start_calday[:2]
+        start_day = start_calday[2:4]
 
         # Get the end time of the seed file
-        etmp = endTime.split(",")
-        eyear = str(etmp[0])
-        ejulianDay = str(etmp[1])
-        efullTime = str(etmp[2])
-        ehour = efullTime.split(":")[0]
-        eminute = efullTime.split(":")[1]
-        esecond = float(efullTime.split(":")[2])
-        ecalday = dayofyear(int(eyear), int(ejulianDay))
-        emonth = ecalday[:2]
-        eday = ecalday[2:4]
+        end_tmp = end_time.split(",")
+        end_year = str(end_tmp[0])
+        end_julian_day = str(end_tmp[1])
+        end_full_time = str(end_tmp[2])
+        end_hour = end_full_time.split(":", maxsplit=1)[0]
+        end_minute = end_full_time.split(":")[1]
+        end_second = float(end_full_time.split(":")[2])
+        end_calday = dayofyear(int(end_year), int(end_julian_day))
+        end_month = end_calday[:2]
+        end_day = end_calday[2:4]
 
         # Set min and max dates for QDateTimeEdits
-        self.minDate = QDate(int(syear), int(smonth), int(sday))
-        self.maxDate = QDate(int(eyear), int(emonth), int(eday))
+        min_date = QDate(int(start_year), int(start_month), int(start_day))
+        max_date = QDate(int(end_year), int(end_month), int(end_day))
 
         # Set min and max times for QDateTimeEdits
-        self.minTime = QTime(int(shour), int(sminute), int(round(ssecond)))
-        self.maxTime = QTime(int(ehour), int(eminute), int(round(esecond)))
+        self.min_time = QTime(
+            int(start_hour), int(start_minute), int(round(start_second))
+        )
+        self.max_time = QTime(int(end_hour), int(end_minute), int(round(end_second)))
 
         # Set min and max QDateTimes for QDateTimeEdits
-        self.minimumDateTime = QDateTime(
-            self.minDate,
-            QTime(int(shour), int(sminute), int(round(ssecond))),
+        self.minimum_date_time = QDateTime(
+            min_date,
+            QTime(int(start_hour), int(start_minute), int(round(start_second))),
         )
-        self.maximumDateTime = QDateTime(
-            self.maxDate,
-            QTime(int(ehour), int(eminute), int(round(esecond))),
+        self.maximum_date_time = QDateTime(
+            max_date,
+            QTime(int(end_hour), int(end_minute), int(round(end_second))),
         )
 
-    def init_widgets(self):
-        self.startDateTime.setMinimumDate(self.minDate)
-        self.startDateTime.setMaximumDate(self.maxDate)
-        self.startDateTime.setDateTime(self.minimumDateTime)
-        self.endDateTime.setMinimumDate(self.minDate)
-        self.endDateTime.setMaximumDate(self.maxDate)
-        self.endDateTime.setDateTime(self.minimumDateTime)
+        return min_date, max_date
+
+    def _init_widgets(self, min_date, max_date):
+        self.start_date_time.setMinimumDate(min_date)
+        self.start_date_time.setMaximumDate(max_date)
+        self.start_date_time.setDateTime(self.minimum_date_time)
+        self.end_date_time.setMinimumDate(min_date)
+        self.end_date_time.setMaximumDate(max_date)
+        self.end_date_time.setDateTime(self.minimum_date_time)
 
         # Set Layout
         layout = QGridLayout()
         layout.addWidget(QLabel("Start Time:"), 0, 0)
-        layout.addWidget(self.startDateTime, 0, 1)
+        layout.addWidget(self.start_date_time, 0, 1)
         layout.addWidget(QLabel("End Time:"), 1, 0)
-        layout.addWidget(self.endDateTime, 1, 1)
+        layout.addWidget(self.end_date_time, 1, 1)
         self.setLayout(layout)
 
-    def get_start_datetime(self):
-        if self.startDateTime.dateTime() >= self.minimumDateTime:
-            return self.startDateTime.dateTime()
-        else:
-            return self.minimumDateTime
+    def get_start_datetime(self) -> QDateTime:
+        """
+        Get the start datetime.
 
-    def get_end_datetime(self):
-        if self.endDateTime.dateTime() <= self.maximumDateTime:
-            return self.endDateTime.dateTime()
-        else:
-            return self.maximumDateTime
+        :return: Start date and time
+        :rtype: QDateTime
+        """
+        if self.start_date_time.dateTime() >= self.minimum_date_time:
+            return self.start_date_time.dateTime()
+        return self.minimum_date_time
 
-    def get_interval_time(self):
+    def get_end_datetime(self) -> QDateTime:
+        """
+        Get the end datetime.
+
+        :return: End date and time
+        :rtype: QDateTime
+        """
+        if self.end_date_time.dateTime() <= self.maximum_date_time:
+            return self.end_date_time.dateTime()
+        return self.maximum_date_time
+
+    def get_interval_time(self) -> int:
+        """
+        Get number of seconds between start and end times.
+
+        :return: Interval time
+        :rtype: int
+        """
         return self.get_start_datetime().secsTo(self.get_end_datetime())
