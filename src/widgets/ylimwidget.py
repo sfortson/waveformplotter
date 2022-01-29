@@ -1,11 +1,10 @@
-from PyQt6 import QtCore
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
 
 
 class SetYLimWidget(QWidget):
-    # Create signals
+    # Create signalss
     set_clicked = pyqtSignal(int, name="SetClicked")
 
     def __init__(self, widget_parent=None):
@@ -48,7 +47,7 @@ class SetYLimWidget(QWidget):
 
     def set_line_value(self, yMax):
         # Set line edit value to yMax
-        self.line.setText(QtCore.QString(yMax))
+        self.line.setText(str(yMax))
 
     def keyPressEvent(self, event):
         # Allow the user to hit enter when setting y-limit
