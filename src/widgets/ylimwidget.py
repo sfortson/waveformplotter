@@ -1,13 +1,7 @@
 from PyQt6 import QtCore
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QKeySequence
-from PyQt6.QtWidgets import (
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QWidget,
-)
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QWidget
 
 
 class SetYLimWidget(QWidget):

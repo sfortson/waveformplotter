@@ -15,8 +15,8 @@ class PlotWidget(qwt.QwtPlot):
         # Init class variables
         self.curve = qwt.QwtPlotCurve()
         self.curve.attach(self)
-        self.x = []
-        self.y = []
+        self.x_vals = []
+        self.y_vals = []
         self.polygon = QPolygonF()
         self.bottomAxisVisible = False
         self.mean = self.get_mean(data)
@@ -76,11 +76,11 @@ class PlotWidget(qwt.QwtPlot):
         delta = data[2]
 
         # load x values
-        self.x = [i * delta + delta for i in range(len(data[0]))]
+        self.x_vals = [i * delta + delta for i in range(len(data[0]))]
         # shift x values by b
-        self.x[:] = [i + b for i in self.x]
+        self.x_vals[:] = [i + b for i in self.x_vals]
         # load y values
-        self.y = [i for i in data[0]]
+        self.y_vals = [i for i in data[0]]
 
     def get_mean(self, data):
         return math.fsum(data[0]) / len(data[0])
@@ -88,15 +88,15 @@ class PlotWidget(qwt.QwtPlot):
     def remove_mean(self):
         if self.includesMean:
             self.includesMean = False
-            self.y[:] = [x - self.mean for x in self.y]
-            self.curve.setData(self.x, self.y)
+            self.y_vals[:] = [x - self.mean for x in self.y_vals]
+            self.curve.setData(self.x_vals, self.y_vals)
             self.replot()
 
     def add_mean(self):
         if not self.includesMean:
             self.includesMean = True
-            self.y[:] = [x + self.mean for x in self.y]
-            self.curve.setData(self.x, self.y)
+            self.y_vals[:] = [x + self.mean for x in self.y_vals]
+            self.curve.setData(self.x_vals, self.y_vals)
             self.replot()
 
     def set_axes(self, xMax, xMin, yMax, yMin):
@@ -124,8 +124,8 @@ class PlotWidget(qwt.QwtPlot):
 
     def delete_plot(self):
         self.curve.setData([], [])
-        self.x = []
-        self.y = []
+        self.x_vals = []
+        self.y_vals = []
         self.detachItems()
 
     def plot_label(self, plotName):

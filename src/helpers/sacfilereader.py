@@ -1,44 +1,41 @@
+import argparse
 import struct
 import sys
-from optparse import OptionParser
 
 
 # Assumes little-endianness
 def sac_reader(filename):
     data = []
-    f = open(filename.strip(), "rb")
-    # Read the header information
-    try:
-        # Get beginning value of the independent variable
-        f.seek(20)
-        b = struct.unpack("<f", f.read(4))
-        # Get LEVEN variable to see if data is evenly spaced
-        f.seek(420)
-        leven = struct.unpack("<i", f.read(4))
-        if not leven:
-            print("The data in this SAC file is not evenly spaced.")
-            sys.exit(2)
-        # Get the increment between evenly spaced samples
-        f.seek(0)
-        delta = struct.unpack("<f", f.read(4))
-        # Get all of the data and store it to memory
-        f.seek(632)
-        byte = f.read(4)
-        while byte != "":
-            data.append(struct.unpack("<f", byte)[0])
-            byte = f.read(4)
-    finally:
-        f.close()
-    return (data, b[0], delta[0])
+    with open(filename.strip(), "rb") as input_file:
+        # Read the header information
+        try:
+            # Get beginning value of the independent variable
+            input_file.seek(20)
+            binary = struct.unpack("<f", input_file.read(4))
+            # Get LEVEN variable to see if data is evenly spaced
+            input_file.seek(420)
+            leven = struct.unpack("<i", input_file.read(4))
+            if not leven:
+                print("The data in this SAC file is not evenly spaced.")
+                sys.exit(2)
+            # Get the increment between evenly spaced samples
+            input_file.seek(0)
+            delta = struct.unpack("<f", input_file.read(4))
+            # Get all of the data and store it to memory
+            input_file.seek(632)
+            byte = input_file.read(4)
+            while byte != "":
+                data.append(struct.unpack("<f", byte)[0])
+                byte = input_file.read(4)
+        except Exception as err:
+            raise err
+    return (data, binary[0], delta[0])
 
 
 def main():
     # Create the command-line options
-    usage = "usage: %prog [-h] filename"
-    parser = OptionParser(
-        usage=usage, description="Read SAC file for plotting"
-    )
-    (_, args) = parser.parse_args()
+    parser = argparse.ArgumentParser(description="Read SAC file for plotting")
+    args = parser.parse_args()
     if len(args) != 1:
         parser.error("Incorrect number of arguments")
 

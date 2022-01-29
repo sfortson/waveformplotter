@@ -1,3 +1,5 @@
+"""Dialog box for display information read from SEED file."""
+
 import os
 import tempfile
 
@@ -25,8 +27,7 @@ class SeedInfoDialog(QDialog):
 
         # Init class variables
         self.buttonBox = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok
-            | QDialogButtonBox.StandardButton.Cancel
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
 
         # List containing station info read from rdseed, and a list of
@@ -49,11 +50,11 @@ class SeedInfoDialog(QDialog):
         self.buttonBox.accepted.connect(self.ok_clicked)
         self.buttonBox.rejected.connect(self.cancel_clicked)
 
-    def ok_clicked(self):
+    def ok_button_clicked(self):
         # Emit a signal when the ok button is clicked
         self.ok_clicked.emit()
 
-    def cancel_clicked(self):
+    def cancel_button_clicked(self):
         # Emit a signale when the cancel button is clicked
         self.cancel_clicked.emit()
 

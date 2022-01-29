@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-
-from helpers.julday import dayofyear
 from PyQt6.QtCore import QDate, QDateTime, QTime
 from PyQt6.QtWidgets import QDateTimeEdit, QGridLayout, QGroupBox, QLabel
+
+from helpers.julday import dayofyear
 
 
 class TimeSelector(QGroupBox):
@@ -61,7 +60,7 @@ class TimeSelector(QGroupBox):
             QTime(int(ehour), int(eminute), int(round(esecond))),
         )
 
-    def init_widgets(self, startTime, endTime):
+    def init_widgets(self):
         self.startDateTime.setMinimumDate(self.minDate)
         self.startDateTime.setMaximumDate(self.maxDate)
         self.startDateTime.setDateTime(self.minimumDateTime)

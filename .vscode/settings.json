@@ -3,11 +3,12 @@
     "editor.formatOnSave": false,
     "python.sortImports.args": [
         "--profile",
-        "black"
+        "black",
     ],
     "python.formatting.provider": "black",
     "python.formatting.blackArgs": [
-        "-l 79"
+        "-l 88",
+        "--experimental-string-processing"
     ],
     "[python]": {
         "editor.formatOnSave": true,
@@ -17,7 +18,11 @@
     },
     "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
     "python.formatting.blackPath": "${workspaceFolder}/.venv/bin/black",
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": false,
     "python.linting.enabled": true,
+    "python.linting.pylintPath": "${workspaceFolder}/.venv/bin/pylint",
+    "python.linting.pylintArgs": [
+        "--extension-pkg-whitelist=PyQt6"
+    ]
 }

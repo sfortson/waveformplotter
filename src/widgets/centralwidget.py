@@ -1,8 +1,10 @@
+"""Central widget for the Waveform Plotter."""
+
 import qwt
-from helpers.sacfilereader import sac_reader
 from PyQt6.QtCore import QSize, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import QFileDialog, QGridLayout, QWidget
 
+from helpers.sacfilereader import sac_reader
 from widgets.plotwidget import PlotWidget
 
 
@@ -16,9 +18,11 @@ class CentralWidget(QWidget):
         QWidget.__init__(self, widget_parent)
 
         # Define class variables
-        self.init_class_variables()
-        self.yMax = 0
-        self.yMin = 0
+        self.plot = []
+        self.x_max = 0
+        self.x_min = 0
+        self.y_max = 0
+        self.y_min = 0
 
         # Set the minimum size and layout
         self.setMinimumSize(750, 250)
@@ -60,28 +64,28 @@ class CentralWidget(QWidget):
     def sync_toggled(self, checked):
         # What to do if sync is toggled on or off
         if checked:
-            if self.yMin == 0 and self.yMax == 0:
+            if self.y_min == 0 and self.yMax == 0:
                 for p in self.plot:
                     p.set_axes_semi_auto(
-                        self.xMin,
-                        self.xMax,
+                        self.x_min,
+                        self.x_max,
                         qwt.QwtPlot.xBottom,
                         qwt.QwtPlot.yLeft,
                     )
             else:
                 for p in self.plot:
-                    p.set_axes(self.xMax, self.xMin, self.yMax, self.yMin)
+                    p.set_axes(self.x_max, self.x_min, self.yMax, self.y_min)
             p.get_zoomer().setZoomBase()
         #                p.bottom_plot(False)
         #            self.plot[-1].bottom_plot(True)
         else:
-            if self.yMin == 0 and self.yMax == 0:
+            if self.y_min == 0 and self.yMax == 0:
                 for p in self.plot:
                     p.set_axes_auto()
             else:
                 for p in self.plot:
                     p.set_axes_semi_auto(
-                        self.yMin,
+                        self.y_min,
                         self.yMax,
                         qwt.QwtPlot.yLeft,
                         qwt.QwtPlot.xBottom,
@@ -90,25 +94,31 @@ class CentralWidget(QWidget):
 
     #                p.bottom_plot(True)
 
-    def sync_axes(self, xMax, xMin):
-        # Set axes to parameter values
-        if xMax > self.xMax:
-            self.xMax = xMax
-        if xMin < self.xMin:
-            self.xMin = xMin
+    def sync_axes(self, x_max: float, x_min: float) -> None:
+        """
+        Set axes to parameter values.
 
-    def set_y_limit(self, yMax, yMin):
-        self.yMax = yMax
-        self.yMin = yMin
+        :param float x_max: Maximum x value
+        :param float x_min: Minimum x value
+        """
+        if x_max > self.x_max:
+            self.x_max = x_max
+        if x_min < self.x_min:
+            self.x_min = x_min
+
+    def set_y_limit(self, y_max: float, y_min: float) -> None:
+        """
+        Set Y axis limits.
+
+        :param float y_max: Maximum value for y axis
+        :param float y_min: Minimum value for y axis
+        """
+        self.y_max = y_max
+        self.y_min = y_min
         self.sync_toggled(self.parentWidget().sync_is_checked())
 
     def get_y_limit(self):
         self.y_updated.emit(self.yMax)
-
-    def init_class_variables(self):
-        self.plot = []
-        self.xMax = 0
-        self.xMin = 0
 
     @pyqtSlot()
     def show_coordinates(self, position):

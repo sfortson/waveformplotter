@@ -1,6 +1,9 @@
 #! /usr/bin/python
 # Filename: julday.py
 
+import argparse
+import datetime
+
 ###############################################################################
 #
 # Julday: Find Julian days from a calendar day and calendar day from Julian Day
@@ -18,7 +21,8 @@
 #
 # Global constants
 #
-monthnames = [
+JANUARY = "01"
+MONTH_NAMES = [
     "01",
     "02",
     "03",
@@ -32,8 +36,8 @@ monthnames = [
     "11",
     "12",
 ]
-monthdays = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365]
-leapdays = [31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366]
+MONTH_DAYS = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365]
+LEAP_DAYS = [31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366]
 
 
 #
@@ -61,37 +65,31 @@ def dayofyear(year, day):
     month = 0
 
     if isleapyear(year):
-        days = leapdays
+        days = LEAP_DAYS
     else:
-        days = monthdays
+        days = MONTH_DAYS
 
     while days[month] < day:
         month = (month + 1) % 12
 
     if day <= days[0]:
-        return (
-            str(monthnames[month]).zfill(2)
-            + str(day).zfill(2)
-            + str(year).zfill(4)
-        )
-    else:
-        return (
-            str(monthnames[month]).zfill(2)
-            + str(day - days[month - 1]).zfill(2)
-            + str(year).zfill(4)
-        )
+        return str(MONTH_NAMES[month]).zfill(2) + str(day).zfill(2) + str(year).zfill(4)
+    return (
+        str(MONTH_NAMES[month]).zfill(2)
+        + str(day - days[month - 1]).zfill(2)
+        + str(year).zfill(4)
+    )
 
 
 #
 # Return Julian day corresponding to Calendar year, month, and day
 #
 def calcday(year, month, day):
-    JANUARY = "01"
     if isleapyear(year):
-        days = leapdays
+        days = LEAP_DAYS
     else:
-        days = monthdays
-    if monthnames[month - 1] == JANUARY:
+        days = MONTH_DAYS
+    if MONTH_NAMES[month - 1] == JANUARY:
         return day
     else:
         return days[month - 2] + day
@@ -101,57 +99,54 @@ def calcday(year, month, day):
 # Read command-line options and call correct methods
 #
 def main():
-    import datetime
-    from optparse import OptionParser
-
-    usage = "usage: %prog [-h] [-j MMDDYYYY] [-c DDDYYYY]"
-    parser = OptionParser(
-        usage=usage,
-        description="Convert calendar day into Julian day and "
-        + "convert Julian day into calendar day. If no arguments "
-        + "are specified today's date is the output.",
+    parser = argparse.ArgumentParser(
+        description=(
+            "Convert calendar day into Julian day and convert Julian day into calendar"
+            " day. If no arguments are specified today's date is the output."
+        ),
     )
-    parser.add_option(
+    parser.add_argument(
         "-j",
         metavar="MMDDYYYY",
         nargs=1,
         help="Return Julian day for calendar date MMDDYYYY",
     )
-    parser.add_option(
+    parser.add_argument(
         "-c",
         metavar="DDDYYYY",
         nargs=1,
         help="Return calendar day for Julian date DDDYYYY",
     )
 
-    (options, args) = parser.parse_args()
-    if options.j:
-        date = options.j
+    args = parser.parse_args()
+    print(args)
+    if args.j:
+        date = args.j
         if len(date) < 8:
             print("Warning: Date must be in the format MMDDYYYY")
         else:
             print(
-                f"Julian Day: \
-                    {calcday(int(date[4:]), int(date[0:2]), int(date[2:4]))}"
+                "Julian Day:                    "
+                f" {calcday(int(date[4:]), int(date[0:2]), int(date[2:4]))}"
             )
 
-    if options.c:
-        date = options.c
+    if args.c:
+        date = args.c
         if len(date) < 7:
             print("Warning: Julian date must be in the format DDDYYYY")
         else:
             print(f"Calenday Day: {dayofyear(int(date[3:]), int(date[0:3]))}")
 
-    if options.j is None and options.c is None:
+    if args.j is None and args.c is None:
         now = datetime.datetime.now()
         str(now)
         print(
-            f"Julian Day: \
-                {calcday(int(now.year), int(now.month), int(now.day))}"
+            "Julian Day:                "
+            f" {calcday(int(now.year), int(now.month), int(now.day))}"
         )
         print(
-            f"Calenday Day: \
-                {monthnames[int(now.month-1)] + str(now.day) + str(now.year)}"
+            "Calenday Day:                "
+            f" {MONTH_NAMES[int(now.month-1)] + str(now.day) + str(now.year)}"
         )
 
 
