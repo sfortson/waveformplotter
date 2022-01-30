@@ -24,5 +24,6 @@
     "python.linting.pylintPath": "${workspaceFolder}/.venv/bin/pylint",
     "python.linting.pylintArgs": [
         "--extension-pkg-whitelist=PyQt6"
-    ]
+    ],
+    "autoDocstring.docstringFormat": "sphinx"
 }
