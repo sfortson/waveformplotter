@@ -21,4 +21,4 @@ jobs:
         pip install -e .
     - name: Analysing the code with pylint
       run: |
-        PYTHONPATH=./src pylint --extension-pkg-whitelist=PyQt6 $(find ./src -name "*.py" | xargs)  
+        PYTHONPATH=./src pylint -E --extension-pkg-whitelist=PyQt6 $(find ./src -name "*.py" | xargs) 
