@@ -8,7 +8,8 @@ from helpers.julday import dayofyear
 
 class TimeSelector(QGroupBox):
     """
-    TimeSelector subclasses QGroupBox to create a widget for selecting start and end times.
+    TimeSelector subclasses QGroupBox to create a widget for selecting
+    start and end times.
 
     :param float start_time: Start time
     :param float end_time: End time

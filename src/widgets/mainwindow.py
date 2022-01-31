@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
 )
 
 from helpers.julday import calcday
+from helpers.sacfilereader import rdseed_name
 from widgets.centralwidget import CentralWidget
 from widgets.seedinfodialog import SeedInfoDialog
 from widgets.ylimwidget import SetYLimWidget
@@ -265,18 +266,8 @@ class PlotWindow(QMainWindow):
 
         channels = " ".join(collector)
 
-        rdseed = (
-            'echo "'
-            + self.seed_name
-            + "\n\n\nd\n\n\n"
-            + channels
-            + "\n\n\n\n\n\n\n\n"
-            + starttime
-            + "\n"
-            + endtime
-            + '\n\n\nQuit\n"'
-            + "| rdseed"
-        )
+        rdseed = rdseed_name(self.seed_name, starttime, endtime, channels=channels)
+
         os.system(str(rdseed))
 
     def load_sac_files(self) -> List[str]:
