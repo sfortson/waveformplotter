@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-
+"""Runner for Waveform Plotter
+"""
 import sys
 
 from PyQt6.QtWidgets import QApplication

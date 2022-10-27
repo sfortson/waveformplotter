@@ -2,8 +2,9 @@
 
 import os
 import tempfile
+from typing import List
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import QDateTime, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -12,109 +13,141 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
+from helpers.sacfilereader import rdseed_name
 from widgets.stationcheckbox import StationCheckBox
 from widgets.timeselector import TimeSelector
 
 
 class SeedInfoDialog(QDialog):
+    """Dialog box for displaying information about the SEED file to the user
+
+    :param seedName: Name of the SEED file
+    :type seedName: str
+    :param dialog_parent: Parent widget, defaults to None
+    :type dialog_parent: QWidget, optional
+    """
+
     # Create signals
     ok_clicked = pyqtSignal(name="ok_clicked")
     cancel_clicked = pyqtSignal(name="cancel_clicked")
 
-    def __init__(self, seedName, dialog_parent=None):
+    def __init__(self, seedName: str, dialog_parent=None):
         # Init the base class
         QDialog.__init__(self, dialog_parent)
 
         # Init class variables
-        self.buttonBox = QDialogButtonBox(
+        self.button_box = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
 
         # List containing station info read from rdseed, and a list of
         # StationCheckBox objects
-        self.stationInfo = []
-        self.stationCheckBoxes = []
-        self.seedName = seedName
+        self.station_info = []
+        self.station_check_boxes = []
+        self.seed_name = seedName
 
         # Call function to retrieve SEED file header information
-        self.get_seed_info(self.seedName)
+        self.get_seed_info(self.seed_name)
 
         # Call functions to create and display dialog box
-        self.create_widgets()
+        self._create_widgets()
 
         # Connect Dialog SIGNALS and SLOTS
-        self.create_connections()
+        self._create_connections()
 
-    def create_connections(self):
+    def _create_connections(self) -> None:
         # Create the connections for the OK and CANCEL buttons
-        self.buttonBox.accepted.connect(self.ok_clicked)
-        self.buttonBox.rejected.connect(self.cancel_clicked)
+        self.button_box.accepted.connect(self.ok_clicked)
+        self.button_box.rejected.connect(self.cancel_clicked)
 
-    def ok_button_clicked(self):
-        # Emit a signal when the ok button is clicked
+    @pyqtSlot()
+    def ok_button_clicked(self) -> None:
+        """Emit a signal when the ok button is clicked"""
         self.ok_clicked.emit()
 
-    def cancel_button_clicked(self):
-        # Emit a signale when the cancel button is clicked
+    @pyqtSlot()
+    def cancel_button_clicked(self) -> None:
+        """Emit a signale when the cancel button is clicked"""
         self.cancel_clicked.emit()
 
-    def get_start_time_info(self):
-        # Return the starting time and date info
-        return self.timeSelector.get_start_datetime()
+    def get_start_time_info(self) -> QDateTime:
+        """Return the starting time and date info
 
-    def get_end_time_info(self):
-        # Return the starting time and date info
-        return self.timeSelector.get_end_datetime()
+        :return: Starting data and time info
+        :rtype: QDateTime
+        """
+        return self.time_selector.get_start_datetime()
 
-    def get_interval_time(self):
-        # Return the interval, in seconds, between the start and end times
-        return self.timeSelector.get_interval_time()
+    def get_end_time_info(self) -> QDateTime:
+        """Return the starting time and date info
 
-    def get_checkbox_info(self):
-        checkBoxInfo = []
-        for s in self.stationCheckBoxes:
-            checkBoxInfo.append(s.get_checked_channels())
-        return checkBoxInfo
+        :return: starting time and date info
+        :rtype: QDateTime
+        """
+        return self.time_selector.get_end_datetime()
 
-    def get_sac_files(self, directory):
-        sacFiles = []
-        seedName = self.get_seed_name()
-        starttime = self.get_start_time_info()
-        endtime = self.get_end_time_info()
-        rdseed = (
-            'echo "'
-            + seedName
-            + "\n\n\nd\n\n\n\n\n\n\n\n\n\n\n"
-            + starttime
-            + "\n"
-            + endtime
-            + '\n\n\nQuit\n"'
-            + "| rdseed"
-        )
+    def get_interval_time(self) -> int:
+        """Return the interval, in seconds, between the start and end times
+
+        :return: interval, in seconds, between the start and end times
+        :rtype: int
+        """
+        #
+        return self.time_selector.get_interval_time()
+
+    def get_checkbox_info(self) -> List[List[str]]:
+        """Get all channel checkbox state
+
+        :return: List of lists containing channel checkbox state
+        :rtype: List[List[str]]
+        """
+        check_box_info = []
+        for station in self.station_check_boxes:
+            check_box_info.append(station.get_checked_channels())
+        return check_box_info
+
+    def get_sac_files(self, directory: str) -> List[str]:
+        """Get SAC files corresponding to selected channels
+
+        :param directory: Directory where to look for SAC files
+        :type directory: str
+        :return: List of SAC files
+        :rtype: List[str]
+        """
+        sac_files = []
+        seed_name = self.get_seed_name()
+        start_time = self.get_start_time_info()
+        end_time = self.get_end_time_info()
+        rdseed = rdseed_name(seed_name, start_time, end_time)
         os.system(str(rdseed))
         files = os.listdir(directory)
-        for cb in self.get_checkbox_info():
-            for channel in cb[1]:
+        for checkbox in self.get_checkbox_info():
+            for channel in checkbox[1]:
                 if channel != "Null":
-                    for f in files:
-                        if cb[0] in f and channel in f:
-                            sacFiles.append(f)
+                    for sac_file in files:
+                        if checkbox[0] in sac_file and channel in sac_file:
+                            sac_files.append(sac_file)
 
-        return sacFiles
+        return sac_files
 
-    def get_seed_name(self):
-        return self.seedName
+    def get_seed_name(self) -> str:
+        """Get SEED file name
 
-    def create_widgets(self):
+        :return: SEED file name
+        :rtype: str
+        """
+        return self.seed_name
+
+    def _create_widgets(self) -> None:
         # Create the grid layout
         grid_layout = QGridLayout()
         row = 0
 
         # Add TimeSelector widget to dialog
-        self.timeSelector = TimeSelector(
-            self.stationInfo[0][3], self.stationInfo[0][6], self
+        self.time_selector = TimeSelector(
+            self.station_info[0][3], self.station_info[0][6], self
         )
-        grid_layout.addWidget(self.timeSelector, row, 0)
+        grid_layout.addWidget(self.time_selector, row, 0)
         row = row + 1
 
         # Add StationCheckBox widget to dialog
@@ -122,9 +155,9 @@ class SeedInfoDialog(QDialog):
         group_box = QGroupBox("Select Stations and Channels", self)
         gb_layout = QVBoxLayout()
 
-        for s in self.stationInfo:
-            sta = StationCheckBox(s[0], s[1], s[8], s[15], self)
-            self.stationCheckBoxes.append(sta)
+        for station in self.station_info:
+            sta = StationCheckBox(station[0], station[1], station[8], station[15], self)
+            self.station_check_boxes.append(sta)
             gb_layout.addWidget(sta)
             row = row + 1
 
@@ -132,43 +165,47 @@ class SeedInfoDialog(QDialog):
         grid_layout.addWidget(group_box)
 
         # Add OK and CANCEL buttons to the dialog
-        grid_layout.addWidget(self.buttonBox, row, 0)
+        grid_layout.addWidget(self.button_box, row, 0)
 
         # Set this dialog's layout to the grid layout
         self.setLayout(grid_layout)
 
-    def get_seed_info(self, seedName):
+    def get_seed_info(self, seed_name: str) -> None:
+        """[summary]
+
+        :param seed_name: [description]
+        :type seed_name: str
+        """
         # Set rdseed output file name
-        f = tempfile.NamedTemporaryFile("rw")
+        with tempfile.NamedTemporaryFile("rw") as temp_file:
 
-        # Make the command that is used to call rdseed
-        command = "rdseed -c -f " + seedName + " > " + f.name
-        os.system(str(command))
+            # Make the command that is used to call rdseed
+            command = "rdseed -c -f " + seed_name + " > " + temp_file.name
+            os.system(str(command))
 
-        # Remove rdseed error file
-        for log in os.listdir(os.getcwd()):
-            if "rdseed.err_log" in log:
-                os.remove(log)
+            # Remove rdseed error file
+            for log in os.listdir(os.getcwd()):
+                if "rdseed.err_log" in log:
+                    os.remove(log)
 
-        # Open up the file created by rdseed and gather necessary information
-        # f = open(infoFileName, 'r')
-        i = iter(f.readlines())
-        data = []
-        data2 = []
-        while True:
-            try:
-                line = i.next()
-                if not line.startswith("#"):
-                    data.append(line)
-            except StopIteration:
-                break
+            # Open up the file created by rdseed and gather necessary information
+            # f = open(infoFileName, 'r')
+            i = iter(temp_file.readlines())
+            data = []
+            data2 = []
+            while True:
+                try:
+                    line = i.next()
+                    if not line.startswith("#"):
+                        data.append(line)
+                except StopIteration:
+                    break
 
-        for d in data:
-            if len(d) == 105:
-                data2.append(d.strip().split())
+            for datum in data:
+                if len(datum) == 105:
+                    data2.append(datum.strip().split())
 
-        self.reorganize_station_info(data2)
-        f.close()
+            self.reorganize_station_info(data2)
 
     def reorganize_station_info(self, data):
         # --- Future work: Create an object instead of list? ---
@@ -182,7 +219,7 @@ class SeedInfoDialog(QDialog):
         station.append(staName)
         for d in data:
             if staName != str(d[1]):
-                self.stationInfo.append(station)
+                self.station_info.append(station)
                 station = []
                 staName = str(d[1])
                 station.append(staName)
@@ -199,4 +236,4 @@ class SeedInfoDialog(QDialog):
                     station.append(str(d[6]))
                     station.append(str(d[7]))
                     station.append(str(d[8]))
-        self.stationInfo.append(station)
+        self.station_info.append(station)
